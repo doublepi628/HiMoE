@@ -1,6 +1,6 @@
 # 👋 HiMoE: Heterogeneity-Informed Mixture of Experts for Fair Spatial-Temporal Forecasting
 
-![](./img/himoe.png)
+![](./img/HiMoE.png)
 
 This is an official Pytorch implementation of HiMoE.
 
