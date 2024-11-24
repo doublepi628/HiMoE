@@ -28,6 +28,3 @@ python main.py --conf .\conf\himoe.json --dataset PEMS04 --data_dir .\data\PEMS0
 
 python main.py --conf .\conf\himoe.json --dataset KNOWAIR --data_dir .\data\KNOWAIR\ --gpuid 0
 ```
-
-## Metric for 4 Datasets
-![](./img/metric.png)
