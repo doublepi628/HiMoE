@@ -2,3 +2,5 @@ __pycache__/
 model/__pycache__/
 log/
 exp/
+data/PEMS04/
+data/KNOWAIR/

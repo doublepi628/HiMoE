@@ -5,7 +5,6 @@ from datetime import datetime
 from torch.utils.data import TensorDataset, DataLoader
 from train import train
 from validate import validate
-from graph import scaled_Laplacian, cheb_polynomial, stsgcn_adj
 
 
 def seed_set(seed=0):
@@ -34,7 +33,7 @@ def json2args(args):
 def init_log(args):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    fh = logging.FileHandler(osp.join(args.log_dir, args.dataset, f"{args.model_name}-{args.time}.log"))
+    fh = logging.FileHandler(osp.join(args.log_dir, args.dataset, f"{args.model_name}-{args.time}.log".replace(":", "-")))
     fh.setLevel(logging.INFO)
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
@@ -43,7 +42,7 @@ def init_log(args):
     ch.setFormatter(formatter)
     logger.addHandler(fh)
     logger.addHandler(ch)
-    logger.info("logger name:%s", osp.join(args.log_dir, args.dataset, f"{args.model_name}-{args.time}.log"))
+    logger.info("logger name:%s", osp.join(args.log_dir, args.dataset, f"{args.model_name}-{args.time}.log".replace(":", "-")))
     vars(args)["logger"] = logger
     return logger
 

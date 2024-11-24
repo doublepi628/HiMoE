@@ -1,6 +1,6 @@
 import numpy as np
 import torch, torch.nn as nn
-from model.himoe_test import HiMoE
+from model.himoe import HiMoE
 from metric import masked_mae_np, masked_mape_np, masked_rmse_np, masked_wae_np, masked_saes_np
 
 def validate(args):
