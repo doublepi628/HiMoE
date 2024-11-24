@@ -1,0 +1,1 @@
+# 👋 HiMoE: Heterogeneity-Informed Mixture of Experts for Fair Spatial-Temporal Forecasting
