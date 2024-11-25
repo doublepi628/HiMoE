@@ -5,9 +5,7 @@
 This is an official Pytorch implementation of HiMoE.
 
 ## Environment
-- python: 3.10
-- numpy: 1.26
-- torch: 2.0.1
+`python`, `numpy`, `torch`
 
 ## Data Preparation
 
