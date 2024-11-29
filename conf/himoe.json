@@ -23,5 +23,5 @@
         "dilation": 1
     },
     "k_dilate": 3,
-    "k_experts": 30
+    "k_experts": 14
 }
