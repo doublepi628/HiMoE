@@ -6,8 +6,8 @@ class GraphLearning(nn.Module):
     def __init__(self, args):
         super(GraphLearning, self).__init__()
         self.args = args
-        self.fc1 = nn.Linear(2, 8, bias=True)
-        self.fc2 = nn.Linear(8, 1, bias=True)
+        self.fc1 = nn.Linear(2, args.mlp_hidden, bias=True)
+        self.fc2 = nn.Linear(args.mlp_hidden, 1, bias=True)
         self.mask = nn.Parameter(torch.full((args.adj.shape[0], args.adj.shape[0]), 0.0), requires_grad=True)
         self.fc1.reset_parameters()
         self.fc2.reset_parameters()
