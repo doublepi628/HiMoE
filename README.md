@@ -1,4 +1,4 @@
-This is an official Pytorch implementation of [HiMoE](https://arxiv.org/abs/2412.00316).
+This is an official Pytorch implementation of HiMoE.
 
 ## Environment
 `python`, `numpy`, `torch`
