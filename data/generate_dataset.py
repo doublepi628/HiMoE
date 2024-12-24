@@ -1,9 +1,7 @@
 import argparse
 import numpy as np
 import os
-import numpy as np
 import pandas as pd
-import scipy.sparse as sp
 
 def generate_weight(args, data):
     data = data.transpose(1,0)
@@ -11,17 +9,22 @@ def generate_weight(args, data):
     mean_ratio = mean_val / np.mean(mean_val)
     return mean_ratio
 
-
-def generate_graph_seq2seq_io_data(args, data, x_offsets, y_offsets):
+def generate_graph_seq2seq_io_data(args, data, x_offsets, y_offsets, mu=None, sigma=None):
     num_samples, num_nodes, _ = data.shape
     data = data[:, :, 0:1]
-    mu, sigma = np.mean(data), np.std(data)
-    data = (data - mu) / sigma
+    
+    if mu is not None and sigma is not None:
+        data = (data - mu) / sigma
+    else:
+        mu, sigma = np.mean(data), np.std(data)
+        data = (data - mu) / sigma
+
     time_of_day = (np.arange(0, num_samples) % args.window)[:, np.newaxis]
     time_of_day = np.repeat(time_of_day, num_nodes, axis=1)[:, :, np.newaxis]
     day_of_week = ((np.arange(0, num_samples) // args.window + args.begin_dow) % 7)[:, np.newaxis]
     day_of_week = np.repeat(day_of_week, num_nodes, axis=1)[:, :, np.newaxis]
     data = np.concatenate([data, time_of_day, day_of_week], axis=2)
+    
     x, y = [], []
     min_t = abs(min(x_offsets)) 
     max_t = abs(num_samples - abs(max(y_offsets))) 
@@ -34,7 +37,6 @@ def generate_graph_seq2seq_io_data(args, data, x_offsets, y_offsets):
     y = np.stack(y, axis=0) 
     return x, y, mu, sigma
 
-
 def generate_train_val_test(args):
     data_seq = np.load(args.traffic_df_filename)['data'][:, :, 0:1]
     r = generate_weight(args, data_seq[:,:,0])
@@ -42,19 +44,29 @@ def generate_train_val_test(args):
     seq_length_x, seq_length_y = args.seq_length_x, args.seq_length_y
     x_offsets = np.arange(-(seq_length_x - 1), 1, 1)
     y_offsets = np.arange(args.y_start, (seq_length_y + 1), 1)
-    x, y, mu, sigma = generate_graph_seq2seq_io_data(args, data_seq, x_offsets=x_offsets, y_offsets=y_offsets)
-    np.save(args.dataset_dir + "dist.npy", np.array([mu, sigma]))
+    
+    seq_train_data = data_seq[:int(0.6 * data_seq.shape[0]), :, 0:1]  # 只在训练集上计算
+    mu_train, sigma_train = np.mean(seq_train_data), np.std(seq_train_data)
+    
+    x, y, mu, sigma = generate_graph_seq2seq_io_data(args, data_seq, x_offsets=x_offsets, y_offsets=y_offsets, mu=mu_train, sigma=sigma_train)
+    
+    np.save(args.dataset_dir + "dist.npy", np.array([mu_train, sigma_train]))
+    
     num_samples = x.shape[0]
     num_test = round(num_samples * 0.2)
     num_train = round(num_samples * 0.6)
     num_val = num_samples - num_train - num_test
+    
     x_train, y_train = x[:num_train], y[:num_train]
     x_val, y_val = x[num_train:num_train + num_val], y[num_train:num_train + num_val]
     x_test, y_test = x[num_train + num_val:], y[num_train + num_val:]
+    
     print(f'y_train: {y_train.shape}, y_val: {y_val.shape}, y_test: {y_test.shape}')
+    
     train_val_raw_data = data_seq[:num_train + num_val + seq_length_y,:,0]
     r = generate_weight(args, train_val_raw_data)
     np.save(args.weight_dir + 'loss_mean_ratio.npy', r)
+    
     for cat in ['train', 'val', 'test']:
         _x, _y = locals()["x_" + cat], locals()["y_" + cat]
         print(cat, "x: ", _x.shape, "y:", _y.shape)
@@ -63,7 +75,6 @@ def generate_train_val_test(args):
             x=_x,
             y=_y
         )
-
 
 def generate_adj(N, dir, sigma):
     adj = np.zeros((N, N))
@@ -98,11 +109,13 @@ if __name__ == '__main__':
     args.dataset_dir = args.dir + 'dataset/'
     args.graph_dir = args.dir + 'graph/'
     args.weight_dir = args.dir + 'weight/'
+    
     if not os.path.exists(args.dataset_dir):
         os.makedirs(args.dataset_dir)
     if not os.path.exists(args.graph_dir):
         os.makedirs(args.graph_dir)
     if not os.path.exists(args.weight_dir):
         os.makedirs(args.weight_dir)
+    
     generate_train_val_test(args)
     generate_adj(args.node_nums, args.dir, args.sigma)
